@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+*.sln.DotSettings.user
+*.db
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs/
+bin/
