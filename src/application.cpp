@@ -6,42 +6,26 @@
 #include <string>
 #include <sstream>
 
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+
+#define GL_VERSION_MAJOR 3
+#define GL_VERSION_MINOR 3
+#define GL_PROFILE GLFW_OPENGL_CORE_PROFILE
+
 #define RES_X 1600
 #define RES_Y 900
-#define FPS 60
-//#define ASPECT_RATIO ((float)RES_X / (float)RES_Y)
 
+// #define ASPECT_RATIO ((float)RES_X / (float)RES_Y)
 
 // https://docs.gl/
-
-// __debugbreak() is a function that stops the program and shows a message in the console
-#define ASSERT(x) if(!(x)) __debugbreak();
-#define glCall(x) glClearError();\
-	x;\
-	ASSERT(glLogCall(#x, __FILE__, __LINE__))
-
-static void glClearError()
-{
-	while (glGetError() != GL_NO_ERROR);
-}
-
-static bool glLogCall(const char* function, const char* file, int line)
-{
-	while (const GLenum error = glGetError())
-	{
-		std::cout << "OpenGL Error: " << error << std::endl;
-        std::cout << function << " in " << file << " at Line : " << line << std::endl;
-        return false;
-	}
-    return true;
-}
 
 struct ShaderProgramSource
 {
 	std::string VertexSource;
 	std::string FragmentSource;
 };
-
 static ShaderProgramSource ParseShader(const std::string& shader)
 {
 	std::ifstream stream(shader);
@@ -77,7 +61,6 @@ static ShaderProgramSource ParseShader(const std::string& shader)
 	}
     return { ss[0].str(), ss[1].str() };
 }
-
 static unsigned int CompileShader(unsigned int type, const std::string& source)
 {
     // Create the shader object
@@ -117,7 +100,6 @@ static unsigned int CompileShader(unsigned int type, const std::string& source)
 	}
 	return id;
 }
-
 static int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
 {
     unsigned int program = glCreateProgram();
@@ -137,7 +119,6 @@ static int CreateShader(const std::string& vertexShader, const std::string& frag
 
     return program;
 }
-
 //auto CreateTriangle(const float& width, const float& height, const float& x, const float& y)
 //{
 //    float triangle[] = {
@@ -159,6 +140,10 @@ int main(void)
 	    return -1;
     }
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_VERSION_MAJOR);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_VERSION_MINOR);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GL_PROFILE);
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(RES_X, RES_Y, "Hello World",
         nullptr, nullptr);
@@ -178,84 +163,104 @@ int main(void)
 	    return -1;
     }
 
-	const float positions[] = {
-		-0.5f, -0.5f, // 0
-		+0.5f, -0.5f, // 1
-		+0.5f, +0.5f, // 2
-		-0.5f, +0.5f  // 3
-	};
-
-    const int indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-
-    // POSITION ARRAY BUFFER
-	unsigned int buffer;
-	int numberOfBuffers = 1;
-	int bufferDataType = GL_ARRAY_BUFFER;
-    int usage = GL_STATIC_DRAW;
-    unsigned int &&sizeOfTheArray = sizeof(float) * 2 * 4;
-
-	glCall(glGenBuffers(numberOfBuffers,&buffer));
-	glCall(glBindBuffer(bufferDataType, buffer));	
-	glCall(glBufferData(bufferDataType, sizeOfTheArray, positions, usage));
-
-	const int &&index = 0;
-	const int &&numberOfComponents = 2; // x and y
-	const int &&vapDataType = GL_FLOAT;
-	const unsigned char &&normalized = GL_FALSE;
-	const int &&stride = sizeof(float) * 2;
-	const auto &&offset = nullptr;
-	glCall(glVertexAttribPointer(index, numberOfComponents, vapDataType, normalized, stride, offset));
-
-    int position = 0;
-    glCall(glEnableVertexAttribArray(position));
-
-    // INDEX ARRAY BUFFER
-    unsigned int ibo;
-    numberOfBuffers = 1;
-    bufferDataType = GL_ELEMENT_ARRAY_BUFFER;
-    sizeOfTheArray = sizeof(float) * 6;
-
-    glCall(glGenBuffers(numberOfBuffers, &ibo));
-    glCall(glBindBuffer(bufferDataType, ibo));
-    glCall(glBufferData(bufferDataType, sizeof(unsigned int) * 3 * 2, indices, usage));
-
-    const ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
-    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-	glCall(glUseProgram(shader));
-
-    glCall(const int uniformLocation = glGetUniformLocation(shader, "u_Color"));
-    ASSERT(uniformLocation != -1);
-
-    float r = 0.0f;
-    float increment = 0.01f;
-    while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glCall(glClear(GL_COLOR_BUFFER_BIT));
-        glCall(glClearError());
+		const float positions[] = {
+			-0.5f, -0.5f, // 0
+			+0.5f, -0.5f, // 1
+			+0.5f, +0.5f, // 2
+			-0.5f, +0.5f  // 3
+		};
 
-        if(r > 1.0f) increment = -0.01f;
-        else if(r < 0.0f) increment = 0.01f;
+	    const unsigned int indices[] = {
+	        0, 1, 2,
+	        2, 3, 0
+	    };
 
-        r += increment;
+	    // Create a Vertex Array Object
+	    // This is a container for all of the vertex attributes
+	    // We need to create one for each vertex buffer we want to use
+	    // We can then bind it to the pipeline and use it to specify the vertex attributes
+	    // We can then unbind it to free up the pipeline for other uses
+	    // We can then bind it again to use it again
+	    // This is a good way to avoid errors and keep your code clean
+	    unsigned int vertexArrayObject;
+	    glCall(glGenVertexArrays(1, &vertexArrayObject));
+	    glCall(glBindVertexArray(vertexArrayObject));
 
-        glCall(glUniform4f(uniformLocation, r, 0.0f, 0.3f, 1.0f));
-        int numberOfIndices = 6;
-        int dataTypeOfIndices = GL_UNSIGNED_INT;
-        glCall(glDrawElements(GL_TRIANGLES, numberOfIndices, dataTypeOfIndices, nullptr));
+	    // POSITION ARRAY BUFFER
+	    VertexBuffer vertexBuffer(positions, sizeof(positions));
 
-        /* Swap front and back buffers */
-        glCall(glfwSwapBuffers(window));
+		const int &&index = 0;
+		const int &&numberOfComponents = 2; // x and y
+		const int &&vapDataType = GL_FLOAT;
+		const unsigned char &&normalized = GL_FALSE;
+		const int &&stride = sizeof(float) * 2;
+		const auto &&offset = nullptr;
+	    int position = 0;
 
-        /* Poll for and process events */
-        glCall(glfwPollEvents());
+		glCall(glVertexAttribPointer(index, numberOfComponents, vapDataType, normalized, stride, offset));
+	    glCall(glEnableVertexAttribArray(position));
+
+
+	    // INDEX ARRAY BUFFER
+	    IndexBuffer indexBuffer(indices, 6);
+
+	    unsigned int ibo;
+	    int numberOfBuffers = 1;
+	    int bufferDataType = GL_ELEMENT_ARRAY_BUFFER;
+	    int sizeOfTheArray = sizeof(float) * 6;
+	    int usage = GL_STATIC_DRAW;
+
+	    glCall(glGenBuffers(numberOfBuffers, &ibo));
+	    glCall(glBindBuffer(bufferDataType, ibo));
+	    glCall(glBufferData(bufferDataType, sizeof(unsigned int) * 3 * 2, indices, usage));
+
+	    const ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
+	    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
+		glCall(glUseProgram(shader));
+
+
+	    glCall(const int uniformLocation = glGetUniformLocation(shader, "u_Color"));
+	    ASSERT(uniformLocation != -1);
+
+	    // Unbound everything
+	    glCall(glBindVertexArray(0));
+	    glCall(glUseProgram(0));
+	    glCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+	    glCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+	    float r = 0.0f;
+	    float increment = 0.01f;
+	    while (!glfwWindowShouldClose(window))
+	    {
+	        /* Render here */
+	        glCall(glClear(GL_COLOR_BUFFER_BIT));
+	        glCall(glClearError());
+
+	        if(r > 1.0f) increment = -0.01f;
+	        else if(r < 0.0f) increment = 0.01f;
+
+	        r += increment;
+
+    		glCall(glUseProgram(shader));
+	        glCall(glUniform4f(uniformLocation, r, 0.0f, 0.3f, 1.0f));
+
+	        glCall(glBindVertexArray(vertexArrayObject));
+    		indexBuffer.Bind();
+	        
+	        int numberOfIndices = 6;
+	        int dataTypeOfIndices = GL_UNSIGNED_INT;
+	        glCall(glDrawElements(GL_TRIANGLES, numberOfIndices, dataTypeOfIndices, nullptr));
+
+	        /* Swap front and back buffers */
+	        glCall(glfwSwapBuffers(window));
+
+	        /* Poll for and process events */
+	        glCall(glfwPollEvents());
+	    }
+
+		glDeleteProgram(shader);
     }
-
-	glDeleteProgram(shader);
-
     glfwTerminate();
     return 0;
 }
