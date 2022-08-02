@@ -1,6 +1,4 @@
 ﻿#pragma once
-#include "Renderer.h"
-
 #include <vector>
 
 #define GL_FALSE 0
@@ -23,7 +21,7 @@ struct LayoutElement
 			case GL_UNSIGNED_INT:	return sizeof(unsigned int);
 			case GL_UNSIGNED_BYTE:	return sizeof(unsigned char);
 		}
-		ASSERT(false);
+		//ASSERT(false);
 		return 0;
 	}
 };

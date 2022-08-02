@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Renderer.h"
 
 class VertexBuffer
 {

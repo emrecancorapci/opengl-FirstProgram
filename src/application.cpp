@@ -2,10 +2,12 @@
 #include <GLFW/glfw3.h>
 
 #include "Renderer.h"
+
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
-#include "Shader.h"
 #include "VertexArray.h"
+#include "Shader.h"
 
 #define GL_VERSION_MAJOR 3
 #define GL_VERSION_MINOR 3
@@ -26,7 +28,6 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL_VERSION_MAJOR);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_VERSION_MINOR);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GL_PROFILE);
-
 
     window = glfwCreateWindow(RESOLUTION_X, RESOLUTION_Y,
 		WINDOW_TITLE, nullptr, nullptr);
@@ -72,27 +73,23 @@ int main(void)
 		indexBuffer.Unbind();
 		shader.Unbind();
 
+		const Renderer renderer;
+
 	    float r = 0.0f;
 	    float increment = 0.01f;
 	    while (!glfwWindowShouldClose(window))
 	    {
-	        glCall(glClear(GL_COLOR_BUFFER_BIT));
-	        glCall(glClearError());
+			renderer.Clear();
 
 	        if(r > 1.0f) increment = -0.01f;
 	        else if(r < 0.0f) increment = 0.01f;
-
+			
 	        r += increment;
 
-    		shader.Bind();
+			shader.Bind();
 			shader.SetUniform4f("u_Color", r, 0.0f, 0.3f, 1.0f);
 
-			vertexArray.Bind();
-    		indexBuffer.Bind();
-	        
-	        int numberOfIndices = 6;
-	        int dataTypeOfIndices = GL_UNSIGNED_INT;
-	        glCall(glDrawElements(GL_TRIANGLES, numberOfIndices, dataTypeOfIndices, nullptr));
+	        renderer.Draw(vertexArray,indexBuffer, shader);
 
 	        /* Swap front and back buffers */
 	        glCall(glfwSwapBuffers(window));
