@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include <GL/glew.h> //GLEW has to be included before GLFW
 #include <iostream>
+#include "GL/glew.h"
 
 #define ASSERT(x) if(!(x)) __debugbreak();
 #define glCall(x) glClearError();\

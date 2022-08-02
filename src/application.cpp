@@ -9,6 +9,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 #define GL_VERSION_MAJOR 3
 #define GL_VERSION_MINOR 3
@@ -175,40 +176,21 @@ int main(void)
 	        0, 1, 2,
 	        2, 3, 0
 	    };
-
-	    // Create a Vertex Array Object
-	    // This is a container for all of the vertex attributes
-	    // We need to create one for each vertex buffer we want to use
-	    // We can then bind it to the pipeline and use it to specify the vertex attributes
-	    // We can then unbind it to free up the pipeline for other uses
-	    // We can then bind it again to use it again
-	    // This is a good way to avoid errors and keep your code clean
-	    unsigned int vertexArrayObject;
-	    glCall(glGenVertexArrays(1, &vertexArrayObject));
-	    glCall(glBindVertexArray(vertexArrayObject));
-
+		
 	    // POSITION ARRAY BUFFER
-	    VertexBuffer vertexBuffer(positions, sizeof(positions));
-
-		const int &&index = 0;
-		const int &&numberOfComponents = 2; // x and y
-		const int &&vapDataType = GL_FLOAT;
-		const unsigned char &&normalized = GL_FALSE;
-		const int &&stride = sizeof(float) * 2;
-		const auto &&offset = nullptr;
-	    int position = 0;
-
-		glCall(glVertexAttribPointer(index, numberOfComponents, vapDataType, normalized, stride, offset));
-	    glCall(glEnableVertexAttribArray(position));
+		const VertexArray vertexArray;
+		const VertexBuffer vertexBuffer(positions, sizeof(positions));
+		VertexBufferLayout layout;
+		layout.Push<float>(2); // 2 floats for position
+		vertexArray.AddBuffer(vertexBuffer, layout);
 
 
 	    // INDEX ARRAY BUFFER
-	    IndexBuffer indexBuffer(indices, 6);
+		const IndexBuffer indexBuffer(indices, 6);
 
 	    unsigned int ibo;
 	    int numberOfBuffers = 1;
 	    int bufferDataType = GL_ELEMENT_ARRAY_BUFFER;
-	    int sizeOfTheArray = sizeof(float) * 6;
 	    int usage = GL_STATIC_DRAW;
 
 	    glCall(glGenBuffers(numberOfBuffers, &ibo));
@@ -245,7 +227,8 @@ int main(void)
     		glCall(glUseProgram(shader));
 	        glCall(glUniform4f(uniformLocation, r, 0.0f, 0.3f, 1.0f));
 
-	        glCall(glBindVertexArray(vertexArrayObject));
+
+			vertexArray.Bind();
     		indexBuffer.Bind();
 	        
 	        int numberOfIndices = 6;
