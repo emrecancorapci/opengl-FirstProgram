@@ -5,7 +5,7 @@
 class VertexArray
 {
 private:
-	unsigned int _RendererId;
+	unsigned int _rendererId;
 public:
 	VertexArray();
 	~VertexArray();
