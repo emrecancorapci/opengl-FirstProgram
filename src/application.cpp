@@ -70,7 +70,7 @@ int main(void)
 		shader.Bind();
     	// shader.SetUniform4f("u_Color", 0.0f, 0.0f, 0.3f, 1.0f);
 
-		Texture texture("res/textures/bel.png");
+		Texture texture("res/textures/bekinski.png");
 		texture.Bind();
 		shader.SetUniform1i("u_Texture", 0);
 
