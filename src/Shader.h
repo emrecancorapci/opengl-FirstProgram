@@ -20,9 +20,9 @@ private:
 
 	ShaderProgramSource ParseShader(const std::string& shader) const;
 	unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
-	unsigned int CompileShader(unsigned type, const std::string& source);
+	unsigned int CompileShader(unsigned int type, const std::string& source);;
 
-	unsigned int GetUniformLocation(const std::string& name);
+	int GetUniformLocation(const std::string& name);
 
 
 public:
@@ -36,5 +36,6 @@ public:
 	void SetUniform3f(const std::string&name, float x, float y, float z);
 	void SetUniform2f(const std::string&name, float x, float y);
 	void SetUniform1f(const std::string&name, float x);
+	void SetUniform1i(const std::string&name, int x);
 	
 };
