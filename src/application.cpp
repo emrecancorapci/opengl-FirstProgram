@@ -14,8 +14,8 @@
 #define GL_PROFILE GLFW_OPENGL_CORE_PROFILE
 
 #define WINDOW_TITLE "OpenGL 3.3"
-#define RESOLUTION_X 1600
-#define RESOLUTION_Y 900
+#define RESOLUTION_X 1024
+#define RESOLUTION_Y 1024
 
 int main(void)
 {
@@ -42,12 +42,12 @@ int main(void)
     if(glewInit() != GLEW_OK)	return -1;
 
     {
-		//	posx,	posy,	texcoordinateX, texCoordinateY
+		//	posx,posy,texCoordinateX,texCoordinateY
 		const float positions[] = {
 			-0.5f, -0.5f, 0.0f, 0.0f, // 0
 			+0.5f, -0.5f, 1.0f, 0.0f, // 1
 			+0.5f, +0.5f, 1.0f, 1.0f, // 2
-			-0.5f, +0.5f, 0.0f, 1.0f, // 3
+			-0.5f, +0.5f, 0.0f, 1.0f // 3
 		};
 
 	    const unsigned int indices[] = {
@@ -55,7 +55,9 @@ int main(void)
 	        2, 3, 0
 	    };
 
+		glCall(glEnable(GL_BLEND))
 		glCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
+		
 
 		VertexArray vertexArray;
 		VertexBuffer vertexBuffer(positions, 4 * 4 * sizeof(float));
@@ -70,7 +72,7 @@ int main(void)
 		shader.Bind();
     	// shader.SetUniform4f("u_Color", 0.0f, 0.0f, 0.3f, 1.0f);
 
-		Texture texture("res/textures/bekinski.png");
+		Texture texture("res/textures/glass-bin.png");
 		texture.Bind();
 		shader.SetUniform1i("u_Texture", 0);
 
@@ -81,16 +83,16 @@ int main(void)
 
 		Renderer renderer;
 
-	    float r = 0.0f;
-	    float increment = 0.01f;
+	    //float r = 0.0f;
+	    //float increment = 0.01f;
 	    while (!glfwWindowShouldClose(window))
 	    {
 			renderer.Clear();
 
-	        if(r > 1.0f) increment = -0.01f;
-	        else if(r < 0.0f) increment = 0.01f;
+	        //if(r > 1.0f) increment = -0.01f;
+	        //else if(r < 0.0f) increment = 0.01f;
 			
-	        r += increment;
+	        //r += increment;
 
 			shader.Bind();
 			// shader.SetUniform4f("u_Color", r, 0.0f, 0.3f, 1.0f);

@@ -7,6 +7,7 @@ class VertexArray
 {
 private:
 	unsigned int _rendererId;
+	const void* offset;
 public:
 	VertexArray();
 	~VertexArray();

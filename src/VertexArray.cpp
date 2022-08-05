@@ -22,16 +22,16 @@ void VertexArray::AddBuffer(const VertexBuffer& buffer, const VertexBufferLayout
 
 	const auto& elements = layout.GetElements();
 	const auto& size = layout.GetStride();
-	const void* offset;
 
 	for(unsigned int i = 0; i < elements.size(); i++)
 	{
 		const auto& element = elements[i];
-		offset = (const void*)(i * element.count);
+		const void* offset;
+		offset = reinterpret_cast<const void*>((i * element.count *
+			LayoutElement::GetSizeOfType(element.type)));
 
-		glEnableVertexAttribArray(i);
-		glVertexAttribPointer(i, element.count, element.type,
-							  element.normalized, size, offset);
+		glCall(glEnableVertexAttribArray(i))
+		glCall(glVertexAttribPointer(i, element.count, element.type, element.normalized, size, offset))
 	}
 }
 

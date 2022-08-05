@@ -6,10 +6,11 @@
 #include "Renderer.h"
 
 Texture::Texture(std::string path)
-: _rendererID(0), _filePath(std::move(path)), _localBuffer(nullptr),
-_width(0), _height(0), _bytePerPixel(0)
+	: _rendererID(0), _filePath(std::move(path)), _localBuffer(nullptr),
+	_width(0), _height(0), _bytePerPixel(0)
 {
 	stbi_set_flip_vertically_on_load(1);
+
 	_localBuffer = stbi_load(_filePath.c_str(),
 		&_width, &_height, &_bytePerPixel, 4);
 
@@ -23,16 +24,18 @@ _width(0), _height(0), _bytePerPixel(0)
 
 	if (_localBuffer)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height,
-			0, GL_RGBA, GL_UNSIGNED_BYTE, _localBuffer);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		stbi_image_free(_localBuffer);
+		glCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height,
+				0, GL_RGBA, GL_UNSIGNED_BYTE, _localBuffer))
+		glCall(glGenerateMipmap(GL_TEXTURE_2D))
+		glCall(glBindTexture(GL_TEXTURE_2D, 0))
 	}
 	else
 	{
 		std::cout << "\nError: Failed to load texture" << std::endl;
 		std::cout << stbi_failure_reason() << std::endl;
 	}
+
+	stbi_image_free(_localBuffer);
 }
 
 Texture::~Texture()

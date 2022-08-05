@@ -6,7 +6,7 @@ class Texture
 private:
 	unsigned int _rendererID;
 	std::string _filePath;
-	unsigned char* _localBuffer;
+	unsigned char* _localBuffer; 
 	int _width, _height, _bytePerPixel;
 public:
 	Texture(std::string path);
