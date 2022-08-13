@@ -5,10 +5,11 @@ layout(location = 0) in vec4 position;
 layout(location = 1) in vec2 texCoord;
 
 out vec2 v_TexCoord;
+uniform mat4 u_modelViewProjectionMatrix;
 
 void main()
 {
-	gl_Position = position;
+	gl_Position = u_modelViewProjectionMatrix * position;
 	v_TexCoord = texCoord;
 };
 
@@ -24,6 +25,6 @@ uniform sampler2D u_Texture;
 
 void main()
 {
-	vec4 texColor = texture(u_Texture, v_TexCoord);
+	vec4 texColor = texture(u_Texture, v_TexCoord) * u_Color;
 	color = texColor;
 };

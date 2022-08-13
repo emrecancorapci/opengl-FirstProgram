@@ -1,5 +1,7 @@
 #include <GL/glew.h> //GLEW has to be included before GLFW
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Renderer.h"
 
@@ -9,13 +11,17 @@
 #include "Shader.h"
 #include "Texture.h"
 
+
+
 #define GL_VERSION_MAJOR 3
 #define GL_VERSION_MINOR 3
 #define GL_PROFILE GLFW_OPENGL_CORE_PROFILE
 
 #define WINDOW_TITLE "OpenGL 3.3"
-#define RESOLUTION_X 1024
-#define RESOLUTION_Y 1024
+#define IRESOLUTION_X 1600
+#define IRESOLUTION_Y 900
+#define FRESOLUTION_X 1600.0f
+#define FRESOLUTION_Y 900.0f
 
 int main(void)
 {
@@ -27,7 +33,7 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL_VERSION_MINOR);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GL_PROFILE);
 
-    window = glfwCreateWindow(RESOLUTION_X, RESOLUTION_Y,
+    window = glfwCreateWindow(IRESOLUTION_X, IRESOLUTION_Y,
 		WINDOW_TITLE, nullptr, nullptr);
 
     if (!window)
@@ -68,9 +74,16 @@ int main(void)
 
 		IndexBuffer indexBuffer(indices, 6);
 
+		const glm::mat4 mvpMatrix = glm::ortho(
+			-FRESOLUTION_X / 1000, FRESOLUTION_X / 1000,
+			-FRESOLUTION_Y / 1000, FRESOLUTION_Y / 1000,
+			-1.0f, 1.0f);
+
 		Shader shader("res/shaders/Basic.shader");
 		shader.Bind();
-    	// shader.SetUniform4f("u_Color", 0.0f, 0.0f, 0.3f, 1.0f);
+    	shader.SetUniform4f("u_Color", 0.0f, 0.0f, 0.3f, 1.0f);
+		shader.SetUniformMat4f("u_modelViewProjectionMatrix", mvpMatrix);
+		
 
 		Texture texture("res/textures/glass-bin.png");
 		texture.Bind();
@@ -83,19 +96,19 @@ int main(void)
 
 		Renderer renderer;
 
-	    //float r = 0.0f;
-	    //float increment = 0.01f;
+	    float r = 0.0f;
+	    float increment = 0.01f;
 	    while (!glfwWindowShouldClose(window))
 	    {
 			renderer.Clear();
 
-	        //if(r > 1.0f) increment = -0.01f;
-	        //else if(r < 0.0f) increment = 0.01f;
+	        if(r > 1.0f) increment = -0.01f;
+	        else if(r < 0.0f) increment = 0.01f;
 			
-	        //r += increment;
+	        r += increment;
 
 			shader.Bind();
-			// shader.SetUniform4f("u_Color", r, 0.0f, 0.3f, 1.0f);
+			shader.SetUniform4f("u_Color", r, 0.0f, 0.3f, 1.0f);
 
 	        renderer.Draw(vertexArray,indexBuffer, shader);
 
